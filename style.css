@@ -1,0 +1,19 @@
+
+.image{
+	width: 50%;
+}
+
+#left_image{
+	float: left;
+}
+
+#right_image{
+	float: right;
+}
+
+#values{
+	width: 200px;
+	height: 250px;
+	background-color: rgba(180,180,180,.5);
+	position: absolute;
+}
