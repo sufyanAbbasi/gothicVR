@@ -14,17 +14,52 @@
         </style>
         <script type="text/javascript" src="ZoomifyImageViewerEnterprise-src.js"></script>
         <script type="text/javascript"> Z.showImage("myContainer", "./Albi_074", 
-            "zNavigatorVisible=0&zToolbarVisible=0&zInitialZoom=0&zClickZoom=0&zMousePan=0&zKeys=0&zConstrainPan=3&zPanSpeed=1&zSmoothPanEasing=3");
+           "zNavigatorVisible=0&zToolbarVisible=0&zInitialZoom=0&zClickZoom=0&zMousePan=0&zKeys=0&zConstrainPan=3&zPanSpeed=1&zSmoothPanEasing=3&zZoomSpeed=5&zMinZoom=0");
+
+            var zoomedIn = false;
+
             Z.Utils.addEventListener(document, 'tilt-up', function(e){
                 Z.viewportCurrent.pan('up');
+                Z.viewportCurrent.updateView(true);
             });
 
             Z.Utils.addEventListener(document, 'tilt-down', function(e){
                 Z.viewportCurrent.pan('down');
+                Z.viewportCurrent.updateView(true);
             });
 
             Z.Utils.addEventListener(document, 'no-vertical-tilt', function(e){
-                Z.viewportCurrent.pan('vertitcalStop');
+                Z.viewportCurrent.pan('verticalStop');
+                Z.viewportCurrent.updateView(true);
+            });
+
+            Z.Utils.addEventListener(document, 'tilt-left', function(e){
+                Z.viewportCurrent.pan('left');
+                Z.viewportCurrent.updateView(true);
+            });
+
+            Z.Utils.addEventListener(document, 'tilt-right', function(e){
+                Z.viewportCurrent.pan('right');
+                Z.viewportCurrent.updateView(true);
+            });
+
+            Z.Utils.addEventListener(document, 'no-horizontal-tilt', function(e){
+                Z.viewportCurrent.pan('horizontalStop');
+                Z.viewportCurrent.updateView(true);
+            });
+
+            Z.Utils.addEventListener(document, 'tap', function(e){
+                if(zoomedIn){
+                    Z.viewportCurrent.zoom('out');
+                    Z.viewportCurrent.updateView(true);
+                }else{
+                    Z.viewportCurrent.zoom('in');
+                    setTimeout(function(){
+                        Z.viewportCurrent.zoom('stop');
+                        
+                    }, 800);
+                }
+                zoomedIn = !zoomedIn;
             });
         </script>
             

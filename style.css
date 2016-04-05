@@ -8,6 +8,7 @@ iframe {
 	height: 100%;
 	width: 50%;
 	border: none;
+	pointer-events: none;
 }
 
 #left_image{

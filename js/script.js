@@ -11,7 +11,7 @@ function init(){
 	        //        then becomes -89.999 --> -0 
 
 
-	        //$('.values').html("alpha: " + o.alpha + "<br>beta: " + o.beta + "<br>gamma: " + o.gamma);
+	       $('.values').html("alpha: " + o.alpha + "<br>beta: " + o.beta + "<br>gamma: " + o.gamma);
 
 	        //vertical tilt checkers
 
@@ -33,10 +33,36 @@ function init(){
 				$('#left_image')[0].contentWindow.document.dispatchEvent(noTilt);
 				$('#right_image')[0].contentWindow.document.dispatchEvent(noTilt);
 			}
+
+			if(o.beta > 3){
+				//tilting up in landscape
+				var tiltLeft = new Event('tilt-left');
+				$('#left_image')[0].contentWindow.document.dispatchEvent(tiltLeft);
+				$('#right_image')[0].contentWindow.document.dispatchEvent(tiltLeft);
+				
+
+			}else if(o.beta < -3){
+				//tilting down in landscape
+				var tiltRight = new Event('tilt-right');
+				$('#left_image')[0].contentWindow.document.dispatchEvent(tiltRight);
+				$('#right_image')[0].contentWindow.document.dispatchEvent(tiltRight);
+				
+			}else{
+				var noTilt = new Event('no-horizontal-tilt');
+				$('#left_image')[0].contentWindow.document.dispatchEvent(noTilt);
+				$('#right_image')[0].contentWindow.document.dispatchEvent(noTilt);
+			}
+
 	    });
 	}
 
-
+	var hammerTime = new Hammer(document);
+	hammerTime.on('tap', function(e){
+		e.preventDefault();
+		var tap = new Event('tap');
+		$('#left_image')[0].contentWindow.document.dispatchEvent(tap);
+		$('#right_image')[0].contentWindow.document.dispatchEvent(tap);
+	});
 
 $(init());
 
