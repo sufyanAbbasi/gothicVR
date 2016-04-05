@@ -16,15 +16,15 @@
         <script type="text/javascript"> Z.showImage("myContainer", "./Albi_075", 
             "zNavigatorVisible=0&zToolbarVisible=0&zInitialZoom=0&zClickZoom=0&zMousePan=0&zKeys=0&zConstrainPan=3&zPanSpeed=1&zSmoothPanEasing=3");
 
-            Z.Utils.addEventListener(document, 'tiltup', function(e){
+            Z.Utils.addEventListener(document, 'tilt-up', function(e){
                 Z.viewportCurrent.pan('up');
             });
 
-            Z.Utils.addEventListener(document, 'tiltdown', function(e){
+            Z.Utils.addEventListener(document, 'tilt-down', function(e){
                 Z.viewportCurrent.pan('down');
             });
 
-            Z.Utils.addEventListener(document, 'notilt', function(e){
+            Z.Utils.addEventListener(document, 'no-vertical-tilt', function(e){
                 Z.viewportCurrent.pan('vertitcalStop');
             });
         </script>

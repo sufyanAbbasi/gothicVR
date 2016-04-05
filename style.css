@@ -18,9 +18,19 @@ iframe {
 	float: right;
 }
 
-#values{
-	width: 200px;
-	height: 250px;
+.values{
+	width: 50%;
+	height: 130px;
 	background-color: rgba(180,180,180,.5);
 	position: absolute;
+	bottom: 0px;
+	text-align: center;
+}
+
+#left_v{
+	left: 0px;
+}
+
+#right_v{
+	right: 0px;
 }
