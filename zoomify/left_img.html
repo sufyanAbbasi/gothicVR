@@ -16,8 +16,6 @@
         <script type="text/javascript"> Z.showImage("myContainer", "./Albi_074", 
            "zNavigatorVisible=0&zToolbarVisible=0&zInitialZoom=0&zClickZoom=0&zMousePan=0&zKeys=0&zConstrainPan=3&zPanSpeed=1&zSmoothPanEasing=3&zZoomSpeed=5&zMinZoom=0");
 
-            var zoomedIn = false;
-
             Z.Utils.addEventListener(document, 'tilt-up', function(e){
                 Z.viewportCurrent.pan('up');
                 Z.viewportCurrent.updateView(true);
@@ -48,19 +46,32 @@
                 Z.viewportCurrent.updateView(true);
             });
 
-            Z.Utils.addEventListener(document, 'tap', function(e){
-                if(zoomedIn){
-                    Z.viewportCurrent.zoom('out');
-                    Z.viewportCurrent.updateView(true);
-                }else{
-                    Z.viewportCurrent.zoom('in');
-                    setTimeout(function(){
-                        Z.viewportCurrent.zoom('stop');
-                        
-                    }, 800);
-                }
-                zoomedIn = !zoomedIn;
+            Z.Utils.addEventListener(document, 'zoom-start', function(e){
+
+                Z.viewportCurrent.zoom('in');
+                Z.viewportCurrent.updateView(true);
+
             });
+
+            Z.Utils.addEventListener(document, 'zoom-end', function(e){
+
+                Z.viewportCurrent.zoom('stop');
+                Z.viewportCurrent.updateView(true);
+
+            });
+
+            Z.Utils.addEventListener(document, 'zoom-out', function(e){
+
+                Z.viewportCurrent.zoom('out');
+                Z.viewportCurrent.updateView(true);
+
+                setTimeout(function(){
+                    Z.viewportCurrent.zoom('stop');
+                    Z.viewportCurrent.updateView(true);
+                }, 500);
+
+            });
+
         </script>
             
         <script type="text/javascript"> 
