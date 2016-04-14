@@ -13,8 +13,60 @@
             }
         </style>
         <script type="text/javascript" src="ZoomifyImageViewerEnterprise-src.js"></script>
-        <script type="text/javascript"> Z.showImage("myContainer", "./Albi_074", 
-           "zNavigatorVisible=0&zToolbarVisible=0&zInitialZoom=0&zClickZoom=0&zMousePan=0&zKeys=0&zConstrainPan=3&zPanSpeed=1&zSmoothPanEasing=3&zZoomSpeed=5&zMinZoom=0");
+        <script type="text/javascript"> 
+        var zoomifyPaths = ["./Albi_074"];
+
+        Z.showImage("myContainer", zoomifyPaths[currentImageIndex], 
+                    "zNavigatorVisible=0&zToolbarVisible=0&zInitialZoom=" + currentZoom + 
+                    "&zClickZoom=0&zMousePan=0&zKeys=0&zConstrainPan=3&zPanSpeed=1&zSmoothPanEasing=3&zZoomSpeed=5&zMinZoom=0");
+
+        var ZOOM_MULTIPLIER = 10;
+
+        var MAX_LEVEL = 8;
+
+        var imageWidth = 5412;
+        var imageHeight = 7216;
+
+        var currentImageIndex = 0;
+
+        var lastCenter = Z.viewportCurrent.calculateCurrentCenterCoordinates();
+
+        var lastBoundingBox = Z.getViewportDisplayBoundingBoxInPixels();
+
+        var currentLevel = 0;
+
+        var currentZoom = currentLevel * ZOOM_MULTIPLIER;
+
+        //pagePoints: [top left, top center, top right, middle left, center, middle right, bottom left, bottom center, bottom, right]
+        var pagePoints = [{x: imageWidth/4, y: , z: }, {}, {}, {}, {}]
+
+        function increaseLevel(){
+            curentLevel = (currentLevel < MAX_LEVEL) ? curentLevel + 1 : currentLevel;
+            currentZoom = currentLevel * ZOOM_MULTIPLIER;
+        }
+
+        function decreaseLevel(){
+            curentLevel = (currentLevel < MAX_LEVEL) ? curentLevel + 1 : currentLevel;
+            currentZoom = currentLevel * ZOOM_MULTIPLIER;
+        }
+
+        function getCenter(){
+            return Z.viewportCurrent.calculateCurrentCenterCoordinates();
+        }
+
+        function getBoundingBox(){
+            return Z.getViewportDisplayBoundingBoxInPixels(true);
+        }
+
+        function calculateNextImagePoints(){
+            var center = getCenter();
+            var boundingBox = getBoundingBox();
+
+            return 
+        }
+
+
+
 
             Z.Utils.addEventListener(document, 'tilt-up', function(e){
                 Z.viewportCurrent.pan('up');

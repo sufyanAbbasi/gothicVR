@@ -5,7 +5,7 @@ function dispatchToIframes(eventString){
 
 function init(){
 
-    gyro.frequency = 100;
+    gyro.frequency = 80;
 
 	gyro.startTracking(function(o) {
 	        // o.x, o.y, o.z for accelerometer
