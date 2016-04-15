@@ -12,20 +12,19 @@
                 width: 100%; height: 100%;
             }
         </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
         <script type="text/javascript" src="ZoomifyImageViewerEnterprise-src.js"></script>
         <script type="text/javascript"> 
         var zoomifyPaths = ["./Albi_075"];
         var currentImageIndex = 0;
 
-
         Z.showImage("myContainer", zoomifyPaths[currentImageIndex], 
            "zNavigatorVisible=0&zToolbarVisible=0&zInitialZoom=0&zClickZoom=0&zMousePan=0&zKeys=0&zConstrainPan=3&zPanSpeed=1&zSmoothPanEasing=3&zZoomSpeed=5&zMinZoom=0");
 
         </script>
-        <script type="text/javascript" src="inner_script.js"></script>
-            
     </head>
     <body>
         <div id="myContainer"></div>
     </body>
+    <script type="text/javascript" src="inner_script.js"></script>
 </html>
