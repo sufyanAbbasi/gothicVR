@@ -17480,7 +17480,7 @@ Z.ZoomifyViewport = function (vpID, vpImgPath, vpAnnotPath, vpHotPath, vpTrackPa
 	//::::::::::: ZOOM RECTANGLE, FULL VIEW, ROTATION, & MEASURE FUNCTIONS :::::::::::
 	//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-	this.zoomAndPanToZoomRectangle = function (zRectPts) {
+	this.zoomAndPanToZoomRectangle = function (zRectPts, callback) {
 		//Get rect height and width and center x and y.
 		var left = Math.min(zRectPts[0].x, zRectPts[1].x, zRectPts[2].x, zRectPts[3].x)
 		var right = Math.max(zRectPts[0].x, zRectPts[1].x, zRectPts[2].x, zRectPts[3].x)
@@ -17496,7 +17496,7 @@ Z.ZoomifyViewport = function (vpID, vpImgPath, vpAnnotPath, vpHotPath, vpTrackPa
 		// Alternative implementation: Compare narrower rectangle dimension to display rather than wider.
 		//var zRectZ = self.calculateZoomToFill(w, h, currentR);
 
-		self.zoomAndPanToView(centerX, centerY, zRectZ);
+		self.zoomAndPanToView(centerX, centerY, zRectZ, null, null, null, callback);
 	}
 
 	this.toggleFullViewModeExternal = function () {

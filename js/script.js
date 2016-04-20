@@ -3,94 +3,80 @@ function dispatchToIframes(eventString){
 	$('#right_image')[0].contentWindow.document.dispatchEvent(new Event(eventString));	
 }
 
+var TILT_LIMIT = 30;
+
+
+
 function init(){
 
-    gyro.frequency = 80;
+	var promise = FULLTILT.getDeviceOrientation({'type': 'game'});
 
-	gyro.startTracking(function(o) {
-	        // o.x, o.y, o.z for accelerometer
-	        // o.alpha, o.beta, o.gamma for gyro
+	promise.then(function(orientationControl) {
+		//console.log(orientationControl);
+		orientationControl.listen(function() {
 
-	        //gamma - while in landscape view:
-	        //        flat with screen facing down is 0°, and rotating towards being flat to your face increases to 90° 
-	        //        then becomes -89.999 --> -0 
+			var euler;
 
+			euler = orientationControl.getLastRawEventData();
 
-	       $('.values').html("alpha: " + o.alpha + "<br>beta: " + o.beta + "<br>gamma: " + o.gamma);
+			//euler = orientationControl.getScreenAdjustedEuler();
 
-	        //vertical tilt checkers
-
-			if(o.gamma > 0 && o.gamma < 85){
-				//tilting up in landscape
-				dispatchToIframes('tilt-up');
-				
-
-			}else if(o.gamma > -75 && o.gamma < 0){
-				//tilting down in landscape
-				dispatchToIframes('tilt-down');
-				
-			}else{
-				dispatchToIframes('no-vertical-tilt');
+			// Don't update CSS position if we are close to encountering gimbal lock
+			if (euler.beta > 85 && euler.beta < 95) {
+				return;
 			}
 
-			if(o.gamma < 0){
+			var tiltX = euler.gamma;
 
-				if(o.beta > 2.5){
-					//tilting up in landscape
-					dispatchToIframes('tilt-left');
-					
-
-				}else if(o.beta < -2.5){
-					//tilting down in landscape
-					dispatchToIframes('tilt-right');
-					
-				}else{
-					dispatchToIframes('no-horizontal-tilt');
-				}
-			}else{
-				// if(o.beta < 0 && o.beta > -175){
-				// 	//tilting up in landscape
-				// 	dispatchToIframes('tilt-left');
-					
-
-				// }else if(o.beta > ){
-				// 	//tilting down in landscape
-				// 	dispatchToIframes('tilt-right');
-					
-				// }else{
-				// 	dispatchToIframes('no-horizontal-tilt');
-				// }
+			if (tiltX > 0) {
+				tiltX = Math.min(tiltX, TILT_LIMIT);
+			} else {
+				tiltX = Math.max(tiltX, TILT_LIMIT * -1);
 			}
-	    });
-	}
 
+			var pxOffsetX = (tiltX * halfScreenWidth) / TILT_LIMIT;
+
+			if ( !initialBeta ) {
+				initialBeta = euler.beta;
+			}
+
+			var tiltY = euler.beta - initialBeta;
+
+			if (tiltY > 0) {
+				tiltY = Math.min(tiltY, TILT_LIMIT);
+			} else {
+				tiltY = Math.max(tiltY, TILT_LIMIT * -1);
+			}
+
+			$('.values').html("tiltX: " + tiltX + "<br>tiltY: " + tiltY);
+
+		});
+
+	}, function(err){
+		console.log(err);
+	});
+
+	
 	//$('.values').html("Listening for events.");
 
 	var eventListener = new Hammer(document);
-	
-	eventListener.get('press').set({
-		time: 1000,
-		threshold: 30,
-	});
 
 	eventListener.get('tap').set({
 		threshold: 700,
 	});
 
-	eventListener.get('press').dropRecognizeWith(eventListener.get('tap'));
-
-	eventListener.on('press', function(ev){
-		//$('.values').html("Press event fired.");
-		dispatchToIframes('zoom-start');
-
+	eventListener.get('doubletap').set({
+		taps: 2,
+		threshold: 700,
+		interval: 500,
 	});
 
-	eventListener.on('pressup', function(ev){
-		//$('.values').html("Pressup event fired.");
-		// setTimeout(function(){
-		// 	$('.values').html("Listening for events.");
-		// }, 500);
-		dispatchToIframes('zoom-end');
+	eventListener.get('doubletap').dropRecognizeWith(eventListener.get('tap'));
+
+	eventListener.on('doubletap', function(ev){
+		//$('.values').html("Press event fired.");
+		dispatchToIframes('zoom-in');
+
 	});
 
 	eventListener.on('tap', function(ev){
@@ -101,6 +87,7 @@ function init(){
 
 		dispatchToIframes('zoom-out');
 	})
+}
 
 $(init());
 
