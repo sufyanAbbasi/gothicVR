@@ -21,10 +21,10 @@ iframe {
 
 .values{
 	width: 50%;
-	height: 130px;
+	height: 150px;
 	background-color: rgba(180,180,180,.5);
 	position: absolute;
-	bottom: 0px;
+	bottom: 5px;
 	text-align: center;
 }
 

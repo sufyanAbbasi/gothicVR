@@ -5,57 +5,69 @@ function dispatchToIframes(eventString){
 
 var TILT_LIMIT = 30;
 
+var gyro=quatFromAxisAngle(0,0,0,0);
+
+//Alpha around Z axis, beta around X axis and gamma around Y axis intrinsic local space  
+   
+function computeQuaternionFromEulers(alpha,beta,gamma)
+{
+	var x = degToRad(beta) ; // beta value
+	var y = degToRad(gamma) ; // gamma value
+	var z = degToRad(alpha) ; // alpha value
+
+	//precompute to save on processing time
+	var cX = Math.cos( x/2 );
+	var cY = Math.cos( y/2 );
+	var cZ = Math.cos( z/2 );
+	var sX = Math.sin( x/2 );
+	var sY = Math.sin( y/2 );
+	var sZ = Math.sin( z/2 );
+
+	var w = cX * cY * cZ - sX * sY * sZ;
+	var x = sX * cY * cZ - cX * sY * sZ;
+	var y = cX * sY * cZ + sX * cY * sZ;
+	var z = cX * cY * sZ + sX * sY * cZ;
+
+	return makeQuat(x,y,z,w);	  
+}
+
+function makeQuat(x,y,z,w)//simple utitlity to make quaternion object
+{
+	return  {"x":x,"y":y,"z":z,"w":w};
+}
+
+function degToRad(deg)// Degree-to-Radian conversion
+{
+     return deg * Math.PI / 180; 
+}
+
+function quatFromAxisAngle(x,y,z,angle)
+{
+  var q={};
+  var half_angle = angle/2;
+  q.x = x * Math.sin(half_angle);
+  q.y = y * Math.sin(half_angle);
+  q.z = z * Math.sin(half_angle);
+  q.w = Math.cos(half_angle);
+  return q;
+}
+
+function processGyro(alpha,beta,gamma)
+	{
+		gyro=computeQuaternionFromEulers(alpha,beta,gamma);
+		$('.values').html("x: " + gyro.x.toFixed(5) + "<br>y: " + gyro.y.toFixed(5) + "<br>z: " + gyro.z.toFixed(5) + "<br>w: " + gyro.w.toFixed(5));
+	}
 
 
 function init(){
-
-	var promise = FULLTILT.getDeviceOrientation({'type': 'game'});
-
-	promise.then(function(orientationControl) {
-		//console.log(orientationControl);
-		orientationControl.listen(function() {
-
-			var euler;
-
-			euler = orientationControl.getLastRawEventData();
-
-			//euler = orientationControl.getScreenAdjustedEuler();
-
-			// Don't update CSS position if we are close to encountering gimbal lock
-			if (euler.beta > 85 && euler.beta < 95) {
-				return;
-			}
-
-			var tiltX = euler.gamma;
-
-			if (tiltX > 0) {
-				tiltX = Math.min(tiltX, TILT_LIMIT);
-			} else {
-				tiltX = Math.max(tiltX, TILT_LIMIT * -1);
-			}
-
-			var pxOffsetX = (tiltX * halfScreenWidth) / TILT_LIMIT;
-
-			if ( !initialBeta ) {
-				initialBeta = euler.beta;
-			}
-
-			var tiltY = euler.beta - initialBeta;
-
-			if (tiltY > 0) {
-				tiltY = Math.min(tiltY, TILT_LIMIT);
-			} else {
-				tiltY = Math.max(tiltY, TILT_LIMIT * -1);
-			}
-
-			$('.values').html("tiltX: " + tiltX + "<br>tiltY: " + tiltY);
-
-		});
-
-	}, function(err){
-		console.log(err);
-	});
-
+	//get orientation info
+	if (window.DeviceOrientationEvent) 
+	{
+	    window.addEventListener("deviceorientation", function () 
+	    {
+	        processGyro(event.alpha, event.beta, event.gamma);  
+	    }, true);
+	} 
 	
 	//$('.values').html("Listening for events.");
 
