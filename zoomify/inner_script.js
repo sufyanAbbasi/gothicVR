@@ -7,7 +7,15 @@ var tileEnum = {
     MIDDLE_RIGHT  : 5,
     BOTTOM_LEFT   : 6,
     BOTTOM_MIDDLE : 7, 
-    BOTTOM_RIGHT  : 8, 
+    BOTTOM_RIGHT  : 8,
+
+    TOP_ROW       : 0,
+    MIDDLE_ROW    : 3,
+    BOTTOM_ROW    : 6,
+
+    LEFT_COLUMN   : 0,
+    MIDDLE_COLUMN : 1,
+    RIGHT_COLUMN  : 2,
 }
 
 var imageWidth = 5412;
@@ -21,6 +29,10 @@ var currentRect = ANCESTOR_RECT;
 var currentlyPanning = false;
 
 var panningTimer = null;
+
+var currentTileRow = tileEnum.MIDDLE_ROW;
+
+var currentTileColumn = tileEnum.MIDDLE_COLUMN;
 
 
 function increaseZoomLevel(){
@@ -136,41 +148,54 @@ function getBoundingBox(){
 }
 
 
-Z.Utils.addEventListener(document, 'tilt-top-left', function(e){
-    panTo(tileEnum.TOP_LEFT);
+Z.Utils.addEventListener(document, 'tilt-up', function(e){
+
+    currentTileRow = tileEnum.TOP_ROW;
+
+    panTo(currentTileRow + currentTileColumn);
+
 });
 
-Z.Utils.addEventListener(document, 'tilt-top-middle', function(e){
-    panTo(tileEnum.TOP_MIDDLE);
+Z.Utils.addEventListener(document, 'no-vertical-tilt', function(e){
+
+    currentTileRow = tileEnum.MIDDLE_ROW;
+
+    panTo(currentTileRow + currentTileColumn);
+
 });
 
-Z.Utils.addEventListener(document, 'tilt-top-right', function(e){
-    panTo(tileEnum.TOP_RIGHT);
+Z.Utils.addEventListener(document, 'tilt-down', function(e){
+
+    currentTileRow = tileEnum.BOTTOM_ROW;
+
+    panTo(currentTileRow + currentTileColumn);
+
 });
 
-Z.Utils.addEventListener(document, 'tilt-middle-left', function(e){
-    panTo(tileEnum.MIDDLE_LEFT);
+Z.Utils.addEventListener(document, 'tilt-left', function(e){
+
+    currentTileColumn = tileEnum.LEFT_COLUMN;
+
+    panTo(currentTileRow + currentTileColumn);
+
 });
 
-Z.Utils.addEventListener(document, 'tilt-center', function(e){
-    panTo(tileEnum.CENTER);
+Z.Utils.addEventListener(document, 'no-horizontal-tilt', function(e){
+
+    currentTileColumn = tileEnum.MIDDLE_COLUMN;
+
+    panTo(currentTileRow + currentTileColumn);
+
 });
 
-Z.Utils.addEventListener(document, 'tilt-middle-right', function(e){
-    panTo(tileEnum.MIDDLE_RIGHT);
+Z.Utils.addEventListener(document, 'tilt-right', function(e){
+
+    currentTileRowColumn = tileEnum.RIGHT_COLUMN;
+
+    panTo(currentTileRow + currentTileColumn);
+
 });
 
-Z.Utils.addEventListener(document, 'tilt-bottom-left', function(e){
-    panTo(tileEnum.BOTTOM_LEFT);
-});
-
-Z.Utils.addEventListener(document, 'tilt-bottom_middle', function(e){
-    panTo(tileEnum.BOTTOM_MIDDLE);
-});
-
-Z.Utils.addEventListener(document, 'tilt-bottom-right', function(e){
-    panTo(tileEnum.BOTTOM_RIGHT);
-});
 
 
 

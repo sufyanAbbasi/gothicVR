@@ -1,13 +1,14 @@
+
+
+var gyro=quatFromAxisAngle(0,0,0,0);
+
+var verticalLimits = [-70, 75];
+
+
 function dispatchToIframes(eventString){
 	$('#left_image')[0].contentWindow.document.dispatchEvent(new Event(eventString));
 	$('#right_image')[0].contentWindow.document.dispatchEvent(new Event(eventString));	
 }
-
-var TILT_LIMIT = 30;
-
-//var gyro=quatFromAxisAngle(0,0,0,0);
-
-//Alpha around Z axis, beta around X axis and gamma around Y axis intrinsic local space  
 
 
 /** If homebutton is on the left:
@@ -20,10 +21,6 @@ var TILT_LIMIT = 30;
  * Bottom Middle:
  * Bottom Right:
  */
-
-
-
-
 
    
 function computeQuaternionFromEulers(alpha,beta,gamma)
@@ -48,7 +45,7 @@ function computeQuaternionFromEulers(alpha,beta,gamma)
 	return makeQuat(x,y,z,w);	  
 }
 
-function makeQuat(x,y,z,w)//simple utitlity to make quaternion object
+function makeQuat(x,y,z,w)//simple utility to make quaternion object
 {
 	return  {"x":x,"y":y,"z":z,"w":w};
 }
@@ -69,22 +66,33 @@ function quatFromAxisAngle(x,y,z,angle)
   return q;
 }
 
+//Alpha around Z axis, beta around X axis and gamma around Y axis intrinsic local space  
+
 function processGyro(alpha,beta,gamma)
 	{
 		gyro=computeQuaternionFromEulers(alpha,beta,gamma);
-		$('.values').html("x: " + gyro.x.toFixed(5) + "<br>y: " + gyro.y.toFixed(5) + "<br>z: " + gyro.z.toFixed(5) + "<br>w: " + gyro.w.toFixed(5) + 
-						  "<br>alpa: " + alpha.toFixed(5) + "<br>beta: " + beta.toFixed(5) + "<br>gamma: " + gamma.toFixed(5)
-		);
+		// $('.values').html("x: " + gyro.x.toFixed(5) + "<br>y: " + gyro.y.toFixed(5) + "<br>z: " + gyro.z.toFixed(5) + "<br>w: " + gyro.w.toFixed(5) + 
+		// 				  "<br>alpa: " + alpha.toFixed(5) + "<br>beta: " + beta.toFixed(5) + "<br>gamma: " + gamma.toFixed(5)
+		// );
+
+		if(gamma > verticalLimits[1]){
+			dispatchToIframes('tilt-up');
+		}else if(gamma < verticalLimits[0]){
+			dispatchToIframes('tilit-down');
+		}else{
+			dispatchToIframes('no-vertical-tilt');
+		}
 	}
 
 
 function init(){
+
 	//get orientation info
 	if (window.DeviceOrientationEvent) 
 	{
-	    window.addEventListener("deviceorientation", function () 
-	    {
-	        processGyro(event.alpha, event.beta, event.gamma);  
+	    window.addEventListener("deviceorientation", function (event) 
+	    {	
+			processGyro(event.alpha, event.beta, event.gamma);  
 	    }, true);
 	} 
 
@@ -111,13 +119,8 @@ function init(){
 	});
 
 	eventListener.on('tap', function(ev){
-		// $('.values').html("Tap event fired");
-		// setTimeout(function(){
-		// 	$('.values').html("Listening for events.");
-		// }, 500);
-
 		dispatchToIframes('zoom-out');
-	})
+	});
 }
 
 $(init());
