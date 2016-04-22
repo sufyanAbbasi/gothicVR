@@ -80,23 +80,14 @@ function processGyro(alpha,beta,gamma)
 
 function init(){
 	//get orientation info
-	// if (window.DeviceOrientationEvent) 
-	// {
-	//     window.addEventListener("deviceorientation", function () 
-	//     {
-	//         processGyro(event.alpha, event.beta, event.gamma);  
-	//     }, true);
-	// } 
+	if (window.DeviceOrientationEvent) 
+	{
+	    window.addEventListener("deviceorientation", function () 
+	    {
+	        processGyro(event.alpha, event.beta, event.gamma);  
+	    }, true);
+	} 
 
-	gyro.startTracking(function(gyroscope) {
-        // o.x, o.y, o.z for accelerometer
-        // o.alpha, o.beta, o.gamma for gyro
-        
-        $('.values').html("x: " + gyroscope.x.toFixed(5) + "<br>y: " + gyroscope.y.toFixed(5) + "<br>z: " + gyroscope.z.toFixed(5) + 
-						  "<br>alpa: " + gyroscope.alpha.toFixed(5) + "<br>beta: " + gyroscope.beta.toFixed(5) + "<br>gamma: " + gyroscope.gamma.toFixed(5)
-		);
-    });
-	
 	//$('.values').html("Listening for events.");
 
 	var eventListener = new Hammer(document);
