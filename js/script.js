@@ -8,6 +8,23 @@ var TILT_LIMIT = 30;
 var gyro=quatFromAxisAngle(0,0,0,0);
 
 //Alpha around Z axis, beta around X axis and gamma around Y axis intrinsic local space  
+
+
+/** If homebutton is on the left:
+ * Top Left: 
+ * Top Middle:
+ * Top Right: 
+ * Middle Left:
+ * Center: 
+ * Bottom Left:
+ * Bottom Middle:
+ * Bottom Right:
+ */
+
+
+
+
+
    
 function computeQuaternionFromEulers(alpha,beta,gamma)
 {
@@ -55,7 +72,9 @@ function quatFromAxisAngle(x,y,z,angle)
 function processGyro(alpha,beta,gamma)
 	{
 		gyro=computeQuaternionFromEulers(alpha,beta,gamma);
-		$('.values').html("x: " + gyro.x.toFixed(5) + "<br>y: " + gyro.y.toFixed(5) + "<br>z: " + gyro.z.toFixed(5) + "<br>w: " + gyro.w.toFixed(5));
+		$('.values').html("x: " + gyro.x.toFixed(5) + "<br>y: " + gyro.y.toFixed(5) + "<br>z: " + gyro.z.toFixed(5) + "<br>w: " + gyro.w.toFixed(5) + 
+						  "<br>alpa: " + alpha.toFixed(5) + "<br>beta: " + beta.toFixed(5) + "<br>gamma: " + gamma.toFixed(5)
+		);
 	}
 
 
