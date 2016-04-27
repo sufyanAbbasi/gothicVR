@@ -2,7 +2,16 @@
 
 var gyro=quatFromAxisAngle(0,0,0,0);
 
-var verticalLimits = [-70, 75];
+var verticalLimits = 70;
+
+var orientationEnum = {
+    UP_NEGATIVE : -1,
+    UP_POSITIVE : 1,
+}
+
+var orientationScaler = orientationEnum.UP_NEGATIVE;
+
+
 
 
 function dispatchToIframes(eventString){
@@ -75,17 +84,39 @@ function processGyro(alpha,beta,gamma)
 		// 				  "<br>alpa: " + alpha.toFixed(5) + "<br>beta: " + beta.toFixed(5) + "<br>gamma: " + gamma.toFixed(5)
 		// );
 
-		if(gamma > verticalLimits[1]){
+		var scaledGamma = gamma*orientationScaler;
+
+		if(scaledGamma < verticalLimits && scaledGamma > 0){
 			dispatchToIframes('tilt-up');
-		}else if(gamma < verticalLimits[0]){
+			// $('.values').html("Tilting Up");
+		}else if(scaledGamma > -verticalLimits && scaledGamma < 0){
 			dispatchToIframes('tilit-down');
+			// $('.values').html("Tilting Down");
 		}else{
 			dispatchToIframes('no-vertical-tilt');
+			// $('.values').html("No Vertical Tilt");
 		}
 	}
 
+function keyEvent(event) {
+  var key = event.keyCode || event.which;
+  if (key >= 49 && key <= 57) {
+    	$('#left_image')[0].contentWindow.panTo(key - 49);
+		$('#right_image')[0].contentWindow.panTo(key - 49);
+	}
+}
 
 function init(){
+
+	document.addEventListener("keypress", keyEvent, false);
+
+	document.addEventListener("click", function(){
+		dispatchToIframes('zoom-in');
+	}, false);
+
+	document.addEventListener("dblclick", function(){
+		dispatchToIframes('zoom-out');
+	}, false);
 
 	//get orientation info
 	if (window.DeviceOrientationEvent) 
@@ -93,8 +124,29 @@ function init(){
 	    window.addEventListener("deviceorientation", function (event) 
 	    {	
 			processGyro(event.alpha, event.beta, event.gamma);  
-	    }, true);
-	} 
+			 switch (window.orientation) {  
+			    case 0:  
+			    
+			        // Portrait 
+			        break; 
+			        
+			    case 180:  
+			    
+			        // Portrait (Upside-down)
+			        break; 
+			  
+			    case -90:  
+			     	orientationScaler = orientationEnum.UP_NEGATIVE;
+			        // Landscape (Clockwise)
+			        break;  
+			  
+			    case 90:  
+			    	orientationScaler = orientationEnum.UP_POSITIVE;
+			        // Landscape  (Counterclockwise)
+			        break;
+			    }
+				    }, true);
+				} 
 
 	//$('.values').html("Listening for events.");
 
@@ -112,13 +164,13 @@ function init(){
 
 	eventListener.get('doubletap').dropRecognizeWith(eventListener.get('tap'));
 
-	eventListener.on('doubletap', function(ev){
+	eventListener.on('tap', function(ev){
 		//$('.values').html("Press event fired.");
 		dispatchToIframes('zoom-in');
 
 	});
 
-	eventListener.on('tap', function(ev){
+	eventListener.on('doubletap', function(ev){
 		dispatchToIframes('zoom-out');
 	});
 }
