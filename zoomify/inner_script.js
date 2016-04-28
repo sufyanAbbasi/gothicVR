@@ -26,10 +26,6 @@ var ANCESTOR_RECT = {x: 0, y: 0, width: imageWidth, height: imageHeight, parent:
 var parentRect = ANCESTOR_RECT; 
 var viewingRect = ANCESTOR_RECT;
 
-var currentTileRow = tileEnum.MIDDLE_ROW;
-
-var currentTileColumn = tileEnum.MIDDLE_COLUMN;
-
 var updateTimer = null;
 
 
@@ -43,10 +39,13 @@ function finishedPan(){
 
 
 function increaseZoomLevel(){
+    console.log("Zooming in");
+    level.currentLevel = level.
     parentRect = viewingRect;
 }
 
 function decreaseZoomLevel(){
+    console.log("Zooming Out");
     if(!parentRect.parent === null){
         parentRect = parentRect.parent;
     }else{
@@ -145,56 +144,10 @@ function getBoundingBox(){
 }
 
 
-Z.Utils.addEventListener(document, 'tilt-up', function(e){
-
-        currentTileRow = tileEnum.TOP_ROW;
-
-        panTo(currentTileRow + currentTileColumn);
+Z.Utils.addEventListener(document, 'pan-to', function(e){
+    panTo(e.detail.row + e.detail.column);
 
 });
-
-Z.Utils.addEventListener(document, 'no-vertical-tilt', function(e){
-
-        currentTileRow = tileEnum.MIDDLE_ROW;
-
-        panTo(currentTileRow + currentTileColumn);
-
-});
-
-Z.Utils.addEventListener(document, 'tilt-down', function(e){
-
-        currentTileRow = tileEnum.BOTTOM_ROW;
-
-        panTo(currentTileRow + currentTileColumn);
-
-});
-
-Z.Utils.addEventListener(document, 'tilt-left', function(e){
-
-        currentTileColumn = tileEnum.LEFT_COLUMN;
-
-        panTo(currentTileRow + currentTileColumn);
-
-
-});
-
-Z.Utils.addEventListener(document, 'no-horizontal-tilt', function(e){
-
-        currentTileColumn = tileEnum.MIDDLE_COLUMN;
-
-        panTo(currentTileRow + currentTileColumn);
-
-});
-
-Z.Utils.addEventListener(document, 'tilt-right', function(e){
-
-        currentTileColumn = tileEnum.RIGHT_COLUMN;
-
-        panTo(currentTileRow + currentTileColumn);
-
-});
-
-
 
 
 Z.Utils.addEventListener(document, 'zoom-in', function(e){

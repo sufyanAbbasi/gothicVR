@@ -1,37 +1,27 @@
-
+var verticalLimits = 70;
 
 var gyro=quatFromAxisAngle(0,0,0,0);
 
-var verticalLimits = 70;
+var tileEnum = {
+    TOP_LEFT      : 0,
+    TOP_MIDDLE    : 1,
+    TOP_RIGHT     : 2,
+    MIDDLE_LEFT   : 3,
+    CENTER        : 4,
+    MIDDLE_RIGHT  : 5,
+    BOTTOM_LEFT   : 6,
+    BOTTOM_MIDDLE : 7, 
+    BOTTOM_RIGHT  : 8,
 
-var orientationEnum = {
-    UP_NEGATIVE : -1,
-    UP_POSITIVE : 1,
+    TOP_ROW       : 0,
+    MIDDLE_ROW    : 3,
+    BOTTOM_ROW    : 6,
+
+    LEFT_COLUMN   : 0,
+    MIDDLE_COLUMN : 1,
+    RIGHT_COLUMN  : 2,
 }
 
-var orientationScaler = orientationEnum.UP_NEGATIVE;
-
-
-
-
-function dispatchToIframes(eventString){
-	$('#left_image')[0].contentWindow.document.dispatchEvent(new Event(eventString));
-	$('#right_image')[0].contentWindow.document.dispatchEvent(new Event(eventString));	
-}
-
-
-/** If homebutton is on the left:
- * Top Left: 
- * Top Middle:
- * Top Right: 
- * Middle Left:
- * Center: 
- * Bottom Left:
- * Bottom Middle:
- * Bottom Right:
- */
-
-   
 function computeQuaternionFromEulers(alpha,beta,gamma)
 {
 	var x = degToRad(beta) ; // beta value
@@ -75,21 +65,22 @@ function quatFromAxisAngle(x,y,z,angle)
   return q;
 }
 
+
+function dispatchToIframes(eventString, data){
+	$('#left_image')[0].contentWindow.document.dispatchEvent(new CustomEvent(eventString, {"detail" : data}));
+	$('#right_image')[0].contentWindow.document.dispatchEvent(new CustomEvent(eventString, {"detail" : data}));	
+}
+
+
 //Alpha around Z axis, beta around X axis and gamma around Y axis intrinsic local space  
 
 function processGyro(alpha,beta,gamma)
 	{
-		gyro=computeQuaternionFromEulers(alpha,beta,gamma);
-		// $('.values').html("x: " + gyro.x.toFixed(5) + "<br>y: " + gyro.y.toFixed(5) + "<br>z: " + gyro.z.toFixed(5) + "<br>w: " + gyro.w.toFixed(5) + 
-		// 				  "<br>alpa: " + alpha.toFixed(5) + "<br>beta: " + beta.toFixed(5) + "<br>gamma: " + gamma.toFixed(5)
-		// );
 
-		var scaledGamma = gamma*orientationScaler;
-
-		if(scaledGamma < verticalLimits && scaledGamma > 0){
+		if(gamma < verticalLimits && gamma > 0){
 			dispatchToIframes('tilt-up');
 			// $('.values').html("Tilting Up");
-		}else if(scaledGamma > -verticalLimits && scaledGamma < 0){
+		}else if(gamma > -verticalLimits && gamma < 0){
 			dispatchToIframes('tilit-down');
 			// $('.values').html("Tilting Down");
 		}else{
@@ -108,6 +99,48 @@ function keyEvent(event) {
 
 function init(){
 
+	var gn = new GyroNorm();
+
+	var args = {
+		    frequency: 100,                   // ( How often the object sends the values - milliseconds )
+		    gravityNormalized:true,         // ( If the garvity related values to be normalized )
+		    orientationBase: GyroNorm.GAME,      // ( Can be GyroNorm.GAME or GyroNorm.WORLD. gn.GAME returns orientation values with respect to the head direction of the device. gn.WORLD returns the orientation values with respect to the actual north direction of the world. )
+		    decimalCount:5,                 // ( How many digits after the decimal point will there be in the return values )
+		    logger:null,                    // ( Function to be called to log messages from gyronorm.js )
+		    screenAdjusted:true,            // ( If set to true it will return screen adjusted values. )
+		};
+
+	 gn.init(args).then(function(){
+        gn.start(function(data){
+            // Process:
+            // data.do.alpha    ( deviceorientation event alpha value )
+            // data.do.beta     ( deviceorientation event beta value )
+            // data.do.gamma    ( deviceorientation event gamma value )
+            // data.do.absolute ( deviceorientation event absolute value )
+
+            // data.dm.x        ( devicemotion event acceleration x value )
+            // data.dm.y        ( devicemotion event acceleration y value )
+            // data.dm.z        ( devicemotion event acceleration z value )
+
+            // data.dm.gx       ( devicemotion event accelerationIncludingGravity x value )
+            // data.dm.gy       ( devicemotion event accelerationIncludingGravity y value )
+            // data.dm.gz       ( devicemotion event accelerationIncludingGravity z value )
+
+            // data.dm.alpha    ( devicemotion event rotationRate alpha value )
+            // data.dm.beta     ( devicemotion event rotationRate beta value )
+            // data.dm.gamma    ( devicemotion event rotationRate gamma value )
+
+            $('.values').html("x: " + data.dm.x  + "<br>y: " + data.dm.y  + "<br>z: " + data.dm.z +
+						  "<br>alpa: " + data.do.alpha + "<br>beta: " + data.do.beta + "<br>gamma: " + data.do.gamma
+			);
+
+			processGyro(data.do.alpha, data.do.beta, data.do.gamma);
+
+        });
+    }).catch(function(e){
+      // Catch if the DeviceOrientation or DeviceMotion is not supported by the browser or device
+    });
+
 	document.addEventListener("keypress", keyEvent, false);
 
 	document.addEventListener("click", function(){
@@ -123,7 +156,6 @@ function init(){
 	{
 	    window.addEventListener("deviceorientation", function (event) 
 	    {	
-			processGyro(event.alpha, event.beta, event.gamma);  
 			 switch (window.orientation) {  
 			    case 0:  
 			    
