@@ -75,19 +75,9 @@ function dispatchToIframes(eventString, data){
 //Alpha around Z axis, beta around X axis and gamma around Y axis intrinsic local space  
 
 function processGyro(alpha,beta,gamma)
-	{
+{
 
-		if(gamma < verticalLimits && gamma > 0){
-			dispatchToIframes('tilt-up');
-			// $('.values').html("Tilting Up");
-		}else if(gamma > -verticalLimits && gamma < 0){
-			dispatchToIframes('tilit-down');
-			// $('.values').html("Tilting Down");
-		}else{
-			dispatchToIframes('no-vertical-tilt');
-			// $('.values').html("No Vertical Tilt");
-		}
-	}
+}
 
 function keyEvent(event) {
   var key = event.keyCode || event.which;
@@ -107,7 +97,7 @@ function init(){
 		    orientationBase: GyroNorm.GAME,      // ( Can be GyroNorm.GAME or GyroNorm.WORLD. gn.GAME returns orientation values with respect to the head direction of the device. gn.WORLD returns the orientation values with respect to the actual north direction of the world. )
 		    decimalCount:5,                 // ( How many digits after the decimal point will there be in the return values )
 		    logger:null,                    // ( Function to be called to log messages from gyronorm.js )
-		    screenAdjusted:true,            // ( If set to true it will return screen adjusted values. )
+		    screenAdjusted:false,            // ( If set to true it will return screen adjusted values. )
 		};
 
 	 gn.init(args).then(function(){
@@ -143,11 +133,14 @@ function init(){
 
 	document.addEventListener("keypress", keyEvent, false);
 
-	document.addEventListener("click", function(){
+	document.addEventListener("click", function(e){
+		e.preventDefault();
 		dispatchToIframes('zoom-in');
 	}, false);
 
-	document.addEventListener("dblclick", function(){
+	document.addEventListener("dblclick", function(e){
+		e.preventDefault();
+		dispatchToIframes('zoom-out');
 		dispatchToIframes('zoom-out');
 	}, false);
 

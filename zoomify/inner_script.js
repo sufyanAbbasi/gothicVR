@@ -26,8 +26,13 @@ var ANCESTOR_RECT = {x: 0, y: 0, width: imageWidth, height: imageHeight, parent:
 var parentRect = ANCESTOR_RECT; 
 var viewingRect = ANCESTOR_RECT;
 
-var updateTimer = null;
+document.addEventListener("onload", function(){
+    box = getBoundingBox();
+    viewingRect = {x: box.x, y: box.y, width: box.width, height: box.height, parent: ANCESTOR_RECT};
+    parentRect = {x: box.x, y: box.y, width: box.width, height: box.height, parent: ANCESTOR_RECT};
+});
 
+var updateTimer = null;
 
 function updateView(){
     zoomPanTo(viewingRect, finishedPan);
@@ -40,13 +45,12 @@ function finishedPan(){
 
 function increaseZoomLevel(){
     console.log("Zooming in");
-    level.currentLevel = level.
     parentRect = viewingRect;
 }
 
 function decreaseZoomLevel(){
     console.log("Zooming Out");
-    if(!parentRect.parent === null){
+    if(parentRect.parent != null){
         parentRect = parentRect.parent;
     }else{
         console.log("Already at Highest Level");
@@ -104,25 +108,37 @@ function generateRect(rect, tileNum){
 
     if(rect.parent == null){
         if(tileNum <= tileEnum.TOP_RIGHT){
-            return {x: topLeftPointX, y: topLeftPointY, width: width, height: height/3, parent: rect};
+            return {x: topLeftPointX, y: topLeftPointY, width: width, height: height/2, parent: rect};
         }else if(tileNum <= tileEnum.MIDDLE_RIGHT){
             tileNum -= 3;
-            return {x: topLeftPointX, y: topLeftPointY + height/3, width: width, height: height/3, parent: rect};
+            return {x: topLeftPointX, y: topLeftPointY + height/2, width: width, height: height/2, parent: rect};
         }else{
             tileNum -= 6;
-            return {x: topLeftPointX, y: topLeftPointY + (2*height)/3, width: width, height: height/3, parent: rect};
+            return {x: topLeftPointX, y: topLeftPointY + (2*height)/2, width: width, height: height/2, parent: rect};
         }
     }else{
         if(tileNum <= tileEnum.TOP_RIGHT){
-            return {x: topLeftPointX + tileNum *(width/3), y: topLeftPointY, width: width/3, height: height/3, parent: rect};
+            console.log("Top Row");
+            return {x: topLeftPointX + tileNum *(width/3), y: topLeftPointY, width: width/3, height: height/2, parent: rect};
         }else if(tileNum <= tileEnum.MIDDLE_RIGHT){
+            console.log("Middle Row");
             tileNum -= 3;
-            return {x: topLeftPointX + tileNum *(width/3), y: topLeftPointY + height/3, width: width/3, height: height/3, parent: rect};
+            return {x: topLeftPointX + tileNum *(width/3), y: topLeftPointY + height/2, width: width/3, height: height/2, parent: rect};
         }else{
+            console.log("Bottom Row")
             tileNum -= 6;
-            return {x: topLeftPointX + tileNum *(width/3), y: topLeftPointY + (2*height)/3, width: width/3, height: height/3, parent: rect};
+            return {x: topLeftPointX + tileNum *(width/3), y: topLeftPointY + (2*height)/2, width: width/3, height: height/2, parent: rect};
         }
     }
+}
+
+function getCenter(){
+    return Z.viewportCurrent.calculateCurrentCenterCoordinates();
+}
+
+function getBoundingBox(){
+    var box = Z.viewportCurrent.getViewportDisplayBoundingBoxInPixels(true);
+    return {x: box.l, y: box.t, width: box.r - box.l, height: box.b - box.t};
 }
 
 function zoomPanTo(rect, callback){
@@ -135,18 +151,9 @@ function zoomPanTo(rect, callback){
     Z.viewportCurrent.zoomAndPanToZoomRectangle(zRectPts, callback);
 }
 
-function getCenter(){
-    return Z.viewportCurrent.calculateCurrentCenterCoordinates();
-}
-
-function getBoundingBox(){
-    return Z.viewportCurrent.getViewportDisplayBoundingBoxInPixels(true);
-}
-
 
 Z.Utils.addEventListener(document, 'pan-to', function(e){
-    panTo(e.detail.row + e.detail.column);
-
+    panTo(e.detail.tile);
 });
 
 
