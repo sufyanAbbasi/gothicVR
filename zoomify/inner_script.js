@@ -26,6 +26,9 @@ var ANCESTOR_RECT = {x: 0, y: 0, width: imageWidth, height: imageHeight, parent:
 var parentRect = ANCESTOR_RECT; 
 var viewingRect = ANCESTOR_RECT;
 
+
+var currentZoom = 0;
+
 document.addEventListener("onload", function(){
     box = getBoundingBox();
     viewingRect = {x: box.x, y: box.y, width: box.width, height: box.height, parent: ANCESTOR_RECT};
@@ -45,17 +48,23 @@ function finishedPan(){
 
 function increaseZoomLevel(){
     console.log("Zooming in");
+    currentZoom++;
     parentRect = viewingRect;
+    dispatchToParent('zoomedTo', {"zoom": currentZoom});
 }
 
 function decreaseZoomLevel(){
     console.log("Zooming Out");
     if(parentRect.parent != null){
         parentRect = parentRect.parent;
+        currentZoom--;
+        dispatchToParent('zoomedTo', {"zoom": currentZoom});
     }else{
         console.log("Already at Highest Level");
         viewingRect = ANCESTOR_RECT;
         parentRect = ANCESTOR_RECT;
+        currentZoom = 0;
+        dispatchToParent('zoomedTo', {"zoom": currentZoom});
     }
 }
 
@@ -175,6 +184,9 @@ window.addEventListener("orientationchange", function(e) {
 }, false);
 
 
+function dispatchToParent(eventString, data){
+    parent.document.dispatchEvent(new CustomEvent(eventString, {"detail" : data}));
+}
 
 
 

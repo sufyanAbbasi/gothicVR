@@ -21,6 +21,10 @@ var tileEnum = {
 var currentColumn = tileEnum.MIDDLE_COLUMN;
 var currentRow = tileEnum.MIDDLE_ROW;
 
+var PRESS_TIME = 750;
+var DOUBLE_TAP_INTERVAL = 350;
+
+var currentZoom = 0;
 
 function dispatchToIframes(eventString, data){
 	$('#left_image')[0].contentWindow.document.dispatchEvent(new CustomEvent(eventString, {"detail" : data}));
@@ -45,15 +49,25 @@ function panToCenter(){
 
 function panToNext(){
 
-	if(currentColumn == tileEnum.RIGHT_COLUMN){
-		currentColumn = tileEnum.LEFT_COLUMN;
+	if(currentZoom == 0){
+		currentColumn = tileEnum.MIDDLE_COLUMN;
+
 		if(currentRow == tileEnum.BOTTOM_ROW){
 			currentRow = tileEnum.TOP_ROW;
 		}else{
 			currentRow += 3;
 		}
 	}else{
-		currentColumn++;
+		if(currentColumn == tileEnum.RIGHT_COLUMN){
+			currentColumn = tileEnum.LEFT_COLUMN;
+			if(currentRow == tileEnum.BOTTOM_ROW){
+				currentRow = tileEnum.TOP_ROW;
+			}else{
+				currentRow += 3;
+			}
+		}else{
+			currentColumn++;
+		}
 	}
 
 	dispatchToIframes('pan-to', {"tile": currentRow + currentColumn});
@@ -63,16 +77,20 @@ function init(){
 
 	document.addEventListener("keypress", keyEvent, false);
 
-	document.addEventListener("click", function(e){
-		e.preventDefault();
-		dispatchToIframes('zoom-in');
-	}, false);
+	document.addEventListener("zoomedTo", function(e){
+		currentZoom = e.detail.zoom;
+	});
 
-	document.addEventListener("dblclick", function(e){
-		e.preventDefault();
-		dispatchToIframes('zoom-out');
-		dispatchToIframes('zoom-out');
-	}, false);
+	// document.addEventListener("click", function(e){
+	// 	e.preventDefault();
+	// 	dispatchToIframes('zoom-in');
+	// }, false);
+
+	// document.addEventListener("dblclick", function(e){
+	// 	e.preventDefault();
+	// 	dispatchToIframes('zoom-out');
+	// 	dispatchToIframes('zoom-out');
+	// }, false);
 
 	//get orientation info
 	if (window.DeviceOrientationEvent) 
@@ -105,46 +123,49 @@ function init(){
 
 	//$('.values').html("Listening for events.");
 
-	var hammer = new Hammer(document, {});
+	var hammer = new Hammer(document);
+
+	hammer.get('press').set({time: PRESS_TIME});
 
 	var singleTap = hammer.get('tap');
-	var doubleTap = new Hammer.Tap({event: 'doubletap', taps: 2, interval: 500 });
-	var tripleTap = new Hammer.Tap({event: 'tripletap', taps: 3, interval: 500 });
-	var press = hammer.get('press').set({time: 750});
+	var doubleTap = hammer.get('doubletap').set({interval: DOUBLE_TAP_INTERVAL});
 
-	hammer.add([doubleTap, tripleTap]);
-
-	tripleTap.recognizeWith([doubleTap, singleTap]);
-	doubleTap.recognizeWith(singleTap);
-
-	doubleTap.requireFailure(tripleTap);
-	singleTap.requireFailure([tripleTap, doubleTap]);
+	var doubleTapped = false;
 
 	hammer.on('press', function(ev){
+		console.log("press event fired");
 		$('.values').html("Press event fired.");
 		setTimeout(function(){
 			$('.values').html("");
 		}, 150);
-		//dispatchToIframes('zoom-in');
-		//panToCenter();
+		dispatchToIframes('zoom-in');
+		panToCenter();
 
-	});
+	}).on('tap', function(ev){
+		setTimeout(function() {
+	    	if(!doubleTapped) {
+	        	console.log("tap event fired");
+				$('.values').html("tap event fired.");
+				setTimeout(function(){
+					$('.values').html("");
+				}, 150);
+				panToNext();
+	       }
 
-	hammer.on('tap', function(ev){
-		$('.values').html("tap event fired.");
-		setTimeout(function(){
-			$('.values').html("");
-		}, 150);
-		//panToNext();
-	});
+	       setTimeout(function() {
+	           doubleTapped = false;
+	       }, DOUBLE_TAP_INTERVAL);
 
-	hammer.on('doubletap', function(ev){
+	    }, DOUBLE_TAP_INTERVAL);
+	}).on('doubletap', function(ev){
+		doubleTapped = true;
+		console.log("double tap fired");
 		$('.values').html("double tap event fired.");
 		setTimeout(function(){
 			$('.values').html("");
 		}, 150);
-		//dispatchToIframes('zoom-out');
-		//panToCenter();
+		dispatchToIframes('zoom-out');
+		panToCenter();
 	});
 }
 
