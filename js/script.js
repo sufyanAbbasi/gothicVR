@@ -1,7 +1,3 @@
-var verticalLimits = 70;
-
-var gyro=quatFromAxisAngle(0,0,0,0);
-
 var tileEnum = {
     TOP_LEFT      : 0,
     TOP_MIDDLE    : 1,
@@ -22,48 +18,8 @@ var tileEnum = {
     RIGHT_COLUMN  : 2,
 }
 
-function computeQuaternionFromEulers(alpha,beta,gamma)
-{
-	var x = degToRad(beta) ; // beta value
-	var y = degToRad(gamma) ; // gamma value
-	var z = degToRad(alpha) ; // alpha value
-
-	//precompute to save on processing time
-	var cX = Math.cos( x/2 );
-	var cY = Math.cos( y/2 );
-	var cZ = Math.cos( z/2 );
-	var sX = Math.sin( x/2 );
-	var sY = Math.sin( y/2 );
-	var sZ = Math.sin( z/2 );
-
-	var w = cX * cY * cZ - sX * sY * sZ;
-	var x = sX * cY * cZ - cX * sY * sZ;
-	var y = cX * sY * cZ + sX * cY * sZ;
-	var z = cX * cY * sZ + sX * sY * cZ;
-
-	return makeQuat(x,y,z,w);	  
-}
-
-function makeQuat(x,y,z,w)//simple utility to make quaternion object
-{
-	return  {"x":x,"y":y,"z":z,"w":w};
-}
-
-function degToRad(deg)// Degree-to-Radian conversion
-{
-     return deg * Math.PI / 180; 
-}
-
-function quatFromAxisAngle(x,y,z,angle)
-{
-  var q={};
-  var half_angle = angle/2;
-  q.x = x * Math.sin(half_angle);
-  q.y = y * Math.sin(half_angle);
-  q.z = z * Math.sin(half_angle);
-  q.w = Math.cos(half_angle);
-  return q;
-}
+var currentColumn = tileEnum.MIDDLE_COLUMN;
+var currentRow = tileEnum.MIDDLE_ROW;
 
 
 function dispatchToIframes(eventString, data){
@@ -71,13 +27,6 @@ function dispatchToIframes(eventString, data){
 	$('#right_image')[0].contentWindow.document.dispatchEvent(new CustomEvent(eventString, {"detail" : data}));	
 }
 
-
-//Alpha around Z axis, beta around X axis and gamma around Y axis intrinsic local space  
-
-function processGyro(alpha,beta,gamma)
-{
-
-}
 
 function keyEvent(event) {
   var key = event.keyCode || event.which;
@@ -87,49 +36,30 @@ function keyEvent(event) {
 	}
 }
 
+function panToCenter(){
+	currentColumn = tileEnum.MIDDLE_COLUMN;
+	currentRow = tileEnum.MIDDLE_ROW;
+
+	dispatchToIframes('pan-to', {"tile": currentRow + currentColumn});
+}
+
+function panToNext(){
+
+	if(currentColumn == tileEnum.RIGHT_COLUMN){
+		currentColumn = tileEnum.LEFT_COLUMN;
+		if(currentRow == tileEnum.BOTTOM_ROW){
+			currentRow = tileEnum.TOP_ROW;
+		}else{
+			currentRow += 3;
+		}
+	}else{
+		currentColumn++;
+	}
+
+	dispatchToIframes('pan-to', {"tile": currentRow + currentColumn});
+}
+
 function init(){
-
-	var gn = new GyroNorm();
-
-	var args = {
-		    frequency: 100,                   // ( How often the object sends the values - milliseconds )
-		    gravityNormalized:true,         // ( If the garvity related values to be normalized )
-		    orientationBase: GyroNorm.GAME,      // ( Can be GyroNorm.GAME or GyroNorm.WORLD. gn.GAME returns orientation values with respect to the head direction of the device. gn.WORLD returns the orientation values with respect to the actual north direction of the world. )
-		    decimalCount:5,                 // ( How many digits after the decimal point will there be in the return values )
-		    logger:null,                    // ( Function to be called to log messages from gyronorm.js )
-		    screenAdjusted:false,            // ( If set to true it will return screen adjusted values. )
-		};
-
-	 gn.init(args).then(function(){
-        gn.start(function(data){
-            // Process:
-            // data.do.alpha    ( deviceorientation event alpha value )
-            // data.do.beta     ( deviceorientation event beta value )
-            // data.do.gamma    ( deviceorientation event gamma value )
-            // data.do.absolute ( deviceorientation event absolute value )
-
-            // data.dm.x        ( devicemotion event acceleration x value )
-            // data.dm.y        ( devicemotion event acceleration y value )
-            // data.dm.z        ( devicemotion event acceleration z value )
-
-            // data.dm.gx       ( devicemotion event accelerationIncludingGravity x value )
-            // data.dm.gy       ( devicemotion event accelerationIncludingGravity y value )
-            // data.dm.gz       ( devicemotion event accelerationIncludingGravity z value )
-
-            // data.dm.alpha    ( devicemotion event rotationRate alpha value )
-            // data.dm.beta     ( devicemotion event rotationRate beta value )
-            // data.dm.gamma    ( devicemotion event rotationRate gamma value )
-
-            $('.values').html("x: " + data.dm.x  + "<br>y: " + data.dm.y  + "<br>z: " + data.dm.z +
-						  "<br>alpa: " + data.do.alpha + "<br>beta: " + data.do.beta + "<br>gamma: " + data.do.gamma
-			);
-
-			processGyro(data.do.alpha, data.do.beta, data.do.gamma);
-
-        });
-    }).catch(function(e){
-      // Catch if the DeviceOrientation or DeviceMotion is not supported by the browser or device
-    });
 
 	document.addEventListener("keypress", keyEvent, false);
 
@@ -177,26 +107,35 @@ function init(){
 
 	var eventListener = new Hammer(document);
 
-	eventListener.get('tap').set({
-		threshold: 700,
-	});
-
 	eventListener.get('doubletap').set({
 		taps: 2,
-		threshold: 700,
-		interval: 500,
+		interval: 100,
 	});
+
+	eventListener.get('press').set({
+		time: 500,
+	});
+
+	eventListener.get('press').dropRecognizeWith(eventListener.get('tap'));
 
 	eventListener.get('doubletap').dropRecognizeWith(eventListener.get('tap'));
 
-	eventListener.on('tap', function(ev){
-		//$('.values').html("Press event fired.");
+	eventListener.on('press', function(ev){
+		$('.values').html("Press event fired.");
 		dispatchToIframes('zoom-in');
+		panToCenter();
 
 	});
 
+	eventListener.on('tap', function(ev){
+		$('.values').html("tap event fired.");
+		panToNext();
+	});
+
 	eventListener.on('doubletap', function(ev){
+		$('.values').html("double tap event fired.");
 		dispatchToIframes('zoom-out');
+		panToCenter();
 	});
 }
 

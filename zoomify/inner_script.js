@@ -153,18 +153,19 @@ function zoomPanTo(rect, callback){
 
 
 Z.Utils.addEventListener(document, 'pan-to', function(e){
+    console.log("Recieved: pan-to: " + e.detail.tile);
     panTo(e.detail.tile);
 });
 
 
 Z.Utils.addEventListener(document, 'zoom-in', function(e){
-
+    console.log("Recieved: zoom-in");
     increaseZoomLevel();
 
 });
 
 Z.Utils.addEventListener(document, 'zoom-out', function(e){
-
+    console.log("Recieved: zoom-out");
    decreaseZoomLevel();
 
 });
