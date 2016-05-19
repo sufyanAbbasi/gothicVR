@@ -105,37 +105,46 @@ function init(){
 
 	//$('.values').html("Listening for events.");
 
-	var eventListener = new Hammer(document);
+	var hammer = new Hammer(document, {});
 
-	eventListener.get('doubletap').set({
-		taps: 2,
-		interval: 100,
-	});
+	var singleTap = hammer.get('tap');
+	var doubleTap = new Hammer.Tap({event: 'doubletap', taps: 2, interval: 500 });
+	var tripleTap = new Hammer.Tap({event: 'tripletap', taps: 3, interval: 500 });
+	var press = hammer.get('press').set({time: 750});
 
-	eventListener.get('press').set({
-		time: 500,
-	});
+	hammer.add([doubleTap, tripleTap]);
 
-	eventListener.get('press').dropRecognizeWith(eventListener.get('tap'));
+	tripleTap.recognizeWith([doubleTap, singleTap]);
+	doubleTap.recognizeWith(singleTap);
 
-	eventListener.get('doubletap').dropRecognizeWith(eventListener.get('tap'));
+	doubleTap.requireFailure(tripleTap);
+	singleTap.requireFailure([tripleTap, doubleTap]);
 
-	eventListener.on('press', function(ev){
+	hammer.on('press', function(ev){
 		$('.values').html("Press event fired.");
-		dispatchToIframes('zoom-in');
-		panToCenter();
+		setTimeout(function(){
+			$('.values').html("");
+		}, 150);
+		//dispatchToIframes('zoom-in');
+		//panToCenter();
 
 	});
 
-	eventListener.on('tap', function(ev){
+	hammer.on('tap', function(ev){
 		$('.values').html("tap event fired.");
-		panToNext();
+		setTimeout(function(){
+			$('.values').html("");
+		}, 150);
+		//panToNext();
 	});
 
-	eventListener.on('doubletap', function(ev){
+	hammer.on('doubletap', function(ev){
 		$('.values').html("double tap event fired.");
-		dispatchToIframes('zoom-out');
-		panToCenter();
+		setTimeout(function(){
+			$('.values').html("");
+		}, 150);
+		//dispatchToIframes('zoom-out');
+		//panToCenter();
 	});
 }
 
