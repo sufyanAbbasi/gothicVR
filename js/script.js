@@ -133,11 +133,11 @@ function init(){
 	var doubleTapped = false;
 
 	hammer.on('press', function(ev){
-		console.log("press event fired");
-		$('.values').html("Press event fired.");
-		setTimeout(function(){
-			$('.values').html("");
-		}, 150);
+		 console.log("press event fired");
+		// $('.values').html("Press event fired.");
+		// setTimeout(function(){
+		// 	$('.values').html("");
+		// }, 150);
 		dispatchToIframes('zoom-in');
 		panToCenter();
 
@@ -145,10 +145,10 @@ function init(){
 		setTimeout(function() {
 	    	if(!doubleTapped) {
 	        	console.log("tap event fired");
-				$('.values').html("tap event fired.");
-				setTimeout(function(){
-					$('.values').html("");
-				}, 150);
+				// $('.values').html("tap event fired.");
+				// setTimeout(function(){
+				// 	$('.values').html("");
+				// }, 150);
 				panToNext();
 	       }
 
@@ -160,10 +160,10 @@ function init(){
 	}).on('doubletap', function(ev){
 		doubleTapped = true;
 		console.log("double tap fired");
-		$('.values').html("double tap event fired.");
-		setTimeout(function(){
-			$('.values').html("");
-		}, 150);
+		// $('.values').html("double tap event fired.");
+		// setTimeout(function(){
+		// 	$('.values').html("");
+		// }, 150);
 		dispatchToIframes('zoom-out');
 		panToCenter();
 	});
